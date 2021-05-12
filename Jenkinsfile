@@ -273,6 +273,67 @@ pipeline {
                 }
             }
         }
+
+        stage ("UCD Publish") {
+            when {
+              anyOf {
+                  branch "develop"
+                  branch "master"
+				  branch "release"
+                  branch "devops"
+              } 
+            }
+            steps {
+                script{
+                    try
+                    {
+					    if (BRANCH_NAME == "release")		
+							{		
+								pushToUCD("${UCD_COMPONENT_NAME}", "${UCD_APP_NAME}", "${DIST}", "release-Rel_${version}_${BUILD_NUMBER}")
+							}else if (BRANCH_NAME != "release"){		
+								pushToUCD("${UCD_COMPONENT_NAME}", "${UCD_APP_NAME}", "${DIST}", "${BRANCH_NAME}-Rel_${version}_${BUILD_NUMBER}")
+							}							
+                        
+						if (BRANCH_NAME == "develop")		
+							{		
+								DEPLOY_API = true		
+							}else if (BRANCH_NAME != "master"){		
+								START_RELEASE = true		
+							}
+                    }
+                    catch (Exception ex)
+                    {
+                        def error_message = ex.getMessage();
+
+                        if (error_message.contains("Error processing command: Version with name ") && error_message.contains("already exists for Component")) {
+                            echo "Component version exists already. Nothing will be created in UCD"
+                        }
+                        else {
+                            echo "Error creating the UCD componenet. The error is as follows:"
+                            echo ex.getMessage()
+                            throw ex
+                        }
+                    }
+                }
+             }
+        }
+
+        stage ("UCD Deploy") {
+            when {
+              allOf {
+                  expression { BRANCH_NAME == 'develop' }
+						expression { DEPLOY_API == true }
+              } 
+            }
+            steps {
+                script {
+						deployFromUCD("${UCD_APP_NAME}", "Development", "Deploy Cashflow Web Api", "${UCD_COMPONENT_NAME}:${BRANCH_NAME}-Rel_${version}_${BUILD_NUMBER}")
+						echo "====> Stage Result ${STAGE_NAME}: ${currentBuild.currentResult}"
+                }
+             }
+        }
+
+
     }
 
     post {
