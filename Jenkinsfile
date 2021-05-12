@@ -183,7 +183,7 @@ pipeline {
         SonarQube_Project_Key = "dograds-server-ping-service"
         SonarQube_Project_Name = "dograds-server-ping-service"
         SonarQube_Project_Exclusions = "**/*.json,**/*Test*,**/*.js,**/Base/**/*,**/RequestMobileOtp/**/*,**/SendMoneyToMobile/**/*,**/MockData/**/*,**/PolicySettings/**/*"
-		DIST = "${workspace_Dir}\\src\\dist"
+		DIST = "${workspace_Dir}\\dist"
         //UrbanCode Deploy Variables
         UCD_APP_NAME = "DOGRADS"
 	    UCD_COMPONENT_NAME = "dograds-server-ping-service"
@@ -248,7 +248,7 @@ pipeline {
             }
         }
 
-        stage("Publish Build"){
+       stage("Publish Build"){
             steps{ 
                 script {                 
                      dir("${env.Project_Folder_Name}"){ 
@@ -317,22 +317,6 @@ pipeline {
                 }
              }
         }
-
-        stage ("UCD Deploy") {
-            when {
-              allOf {
-                  expression { BRANCH_NAME == 'develop' }
-						expression { DEPLOY_API == true }
-              } 
-            }
-            steps {
-                script {
-						deployFromUCD("${UCD_APP_NAME}", "Development", "Deploy Cashflow Web Api", "${UCD_COMPONENT_NAME}:${BRANCH_NAME}-Rel_${version}_${BUILD_NUMBER}")
-						echo "====> Stage Result ${STAGE_NAME}: ${currentBuild.currentResult}"
-                }
-             }
-        }
-
 
     }
 
