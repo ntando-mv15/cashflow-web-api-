@@ -183,7 +183,7 @@ pipeline {
         SonarQube_Project_Key = "dograds-server-ping-service"
         SonarQube_Project_Name = "dograds-server-ping-service"
         SonarQube_Project_Exclusions = "**/*.json,**/*Test*,**/*.js,**/Base/**/*,**/RequestMobileOtp/**/*,**/SendMoneyToMobile/**/*,**/MockData/**/*,**/PolicySettings/**/*"
-		DIST = "${workspace_Dir}\\dist"
+		DIST = "${workspace_Dir}\\"
         //UrbanCode Deploy Variables
         UCD_APP_NAME = "DOGRADS"
 	    UCD_COMPONENT_NAME = "dograds-server-ping-service"
