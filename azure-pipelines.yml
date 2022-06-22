@@ -15,11 +15,11 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
-- task: SonarQubePrepare@5
+- task: SonarSource.sonarqube.15B84CA1-B62F-4A2A-A403-89B77A063157.SonarQubePrepare@5
+  displayName: 'Prepare analysis on SonarQube'
   inputs:
-    SonarQube: 'sonarqube-dograds'
-    scannerMode: 'MSBuild'
-    projectKey: 'dograds-growth-agility'
+    SonarQube: 'sonarqube-growth-agility'
+    projectKey: 'dograds-growth-agility  '
     projectName: 'growth-agility'
 
 - task: NuGetCommand@2
@@ -36,3 +36,11 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+
+steps:
+- task: SonarSource.sonarqube.6D01813A-9589-4B15-8491-8164AEB38055.SonarQubeAnalyze@5
+  displayName: 'Run Code Analysis'
+
+steps:
+- task: SonarSource.sonarqube.291ed61f-1ee4-45d3-b1b0-bf822d9095ef.SonarQubePublish@5
+  displayName: 'Publish Quality Gate Result'
