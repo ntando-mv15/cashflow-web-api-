@@ -1,0 +1,66 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.r)
+
+pool:
+  name: Rancher-prod
+
+pr: none
+trigger: none  
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: SonarQubePrepare@5
+  inputs:
+    SonarQube: 'sonarqube-growth-agility'
+    scannerMode: 'MSBuild'
+    projectVersion: '$(Build.BuildNumber)'
+    projectKey: 'dograds-growth-agility'
+    projectName: 'growth-agility'
+    extraProperties: |
+      sonar.exclusions=**/*.json
+      sonar.verbose=true
+      sonar.branch.name=$(Build.SourceBranchName)
+
+- task: DotNetCoreCLI@2 
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    projects: '**/*.csproj'
+    feedsToUse: 'select'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '**/*.sln'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '**/*.csproj'
+
+- task: SonarQubeAnalyze@5
+
+- task: SonarQubePublish@5
+  inputs:
+    pollingTimeoutSec: '300'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'publish artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+
+
